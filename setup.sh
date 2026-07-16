@@ -62,7 +62,9 @@ YANDEX_METRIKA_ID=""                 # Метрику подключают в WP
 # DNS-подсказка
 SRV_IP=$(curl -s --max-time 8 https://ifconfig.me || echo "")
 for d in "$BLOG_DOMAIN" "$N8N_DOMAIN"; do
-  rip=$(getent hosts "$d" | awk '{print $1}' | head -1)
+  # || rip="" ОБЯЗАТЕЛЬНО: если домен не резолвится, getent выходит с кодом 2,
+  # pipefail пробрасывает его в присваивание и set -e молча убивает установщик.
+  rip=$(getent hosts "$d" 2>/dev/null | awk '{print $1}' | head -1) || rip=""
   [ -z "$rip" ] && warn "Домен $d пока не направлен на сервер. A-запись → ${SRV_IP:-<IP сервера>} (SSL не выпустится без этого)"
 done
 
