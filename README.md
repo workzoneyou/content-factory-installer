@@ -26,18 +26,18 @@
 
 ---
 
-## Установка
+## Установка — одна команда
 
 ```bash
-git clone <this-repo> factory && cd factory
-cp .env.example .env
-nano .env            # BRAND, домены, SSL_EMAIL, автор (пароли/ключи — пусто, сгенерятся)
-sudo ./install.sh
+curl -sSL https://raw.githubusercontent.com/workzoneyou/content-factory-installer/main/setup.sh | sudo bash
 ```
 
-Идемпотентен — можно запускать повторно.
+Установщик **задаёт вопросы прямо в терминале** (бренд, домены, SSL-email, автор), сам
+генерирует все пароли/ключи, скачивает компоненты и разворачивает систему. Редактировать
+файлы не нужно. Вопросы читаются через `/dev/tty`, поэтому работают даже в `curl | bash`.
+Все ответы сохраняются в `~/<бренд>-factory/.env`.
 
-### Что делает install.sh сам
+### Что делает setup.sh сам
 1. Генерирует пароли БД, WP-админа, ключ шифрования n8n (в `.env`).
 2. Ставит Docker (если нет), firewall (22/80/443).
 3. Поднимает **WordPress-стек**, ставит WP-CLI, ставит WP, локаль `ru_RU`, permalinks `/%postname%/`.
@@ -86,8 +86,8 @@ bash wordpress/scripts/backup.sh                # локальный бэкап 
 
 ```
 factory-installer/
-├── install.sh                     мастер-установщик (WP + n8n)
-├── .env.example                   все параметры
+├── setup.sh                       интерактивный установщик (curl | bash), WP + n8n
+├── .env.example                   справочник параметров (сам заполняется вопросами)
 ├── wordpress/
 │   ├── docker-compose.yml         Traefik + MariaDB + WP
 │   ├── theme/                     тема (нейтральный бренд, задаётся в .env)
