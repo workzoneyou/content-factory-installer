@@ -17,7 +17,7 @@ die(){ echo -e "${RED}✗${NC} $*" >&2; exit 1; }
 # --- ввод через /dev/tty (работает при curl | bash) ---
 ask(){ # ask "Вопрос" ПЕРЕМЕННАЯ ["дефолт"]
   local prompt="$1" var="$2" def="${3:-}" val
-  local hint=""; [ -n "$def" ] && hint=" [${def}]"
+  local hint=""; [ -n "$def" ] && hint=" [${def}] (Enter — оставить)"
   read -rp "$(echo -e "${YELLOW}?${NC} ${prompt}${hint}: ")" val < /dev/tty || val=""
   [ -z "$val" ] && val="$def"
   printf -v "$var" '%s' "$val"
