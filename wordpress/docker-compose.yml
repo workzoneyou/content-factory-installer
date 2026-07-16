@@ -1,0 +1,91 @@
+services:
+
+  # ------------------------------------------------------------
+  # Traefik — reverse proxy + Let's Encrypt (общий для WP и n8n)
+  # ------------------------------------------------------------
+  traefik:
+    image: traefik:v3
+    container_name: ${BRAND}-traefik
+    restart: unless-stopped
+    environment:
+      # Docker 29.x требует минимум API 1.40; пиним, иначе клиент Traefik шлёт 1.24 → "client too old"
+      - DOCKER_API_VERSION=1.44
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      - "--certificatesresolvers.le.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./traefik/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - ${BRAND}-network
+
+  # ------------------------------------------------------------
+  # MariaDB
+  # ------------------------------------------------------------
+  db:
+    image: mariadb:10.6
+    container_name: ${BRAND}-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - ./db-data:/var/lib/mysql
+    networks:
+      - ${BRAND}-internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # ------------------------------------------------------------
+  # WordPress (Apache + PHP 8.2)
+  # ------------------------------------------------------------
+  wp:
+    image: wordpress:php8.2-apache
+    container_name: ${BRAND}-wp
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: ${BRAND}-db:3306
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./theme:/var/www/html/wp-content/themes/${BRAND}
+      - ./mu-plugins:/var/www/html/wp-content/mu-plugins
+      - ./php/uploads-memory.ini:/usr/local/etc/php/conf.d/zz-uploads-memory.ini:ro
+    networks:
+      - ${BRAND}-network
+      - ${BRAND}-internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${BRAND}-network"
+      - "traefik.http.routers.${BRAND}-wp.rule=Host(`${BLOG_DOMAIN}`)"
+      - "traefik.http.routers.${BRAND}-wp.entrypoints=websecure"
+      - "traefik.http.routers.${BRAND}-wp.tls=true"
+      - "traefik.http.routers.${BRAND}-wp.tls.certresolver=le"
+      - "traefik.http.services.${BRAND}-wp.loadbalancer.server.port=80"
+
+networks:
+  # общая сеть с n8n — создаётся здесь, n8n подключается к ней как external
+  ${BRAND}-network:
+    name: ${BRAND}-network
+  ${BRAND}-internal:
+    internal: true

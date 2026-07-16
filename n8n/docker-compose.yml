@@ -1,0 +1,71 @@
+services:
+
+  # ------------------------------------------------------------
+  # Postgres для n8n
+  # ------------------------------------------------------------
+  n8n-db:
+    image: postgres:16
+    container_name: ${BRAND}-n8n-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: ${N8N_DB_PASSWORD}
+    volumes:
+      - ./n8n-db:/var/lib/postgresql/data
+    networks:
+      - n8n-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n -d n8n"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # ------------------------------------------------------------
+  # n8n (за общим Traefik, сеть ${BRAND}-network создаёт WP-стек)
+  # ------------------------------------------------------------
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.123.5
+    container_name: ${BRAND}-n8n
+    restart: unless-stopped
+    depends_on:
+      n8n-db:
+        condition: service_healthy
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=${BRAND}-n8n-db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=${N8N_DB_PASSWORD}
+      - N8N_HOST=${N8N_DOMAIN}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_DOMAIN}/
+      - N8N_EDITOR_BASE_URL=https://${N8N_DOMAIN}/
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_PROXY_HOPS=1
+      # ВАЖНО: без этого Code-ноды падают по таймауту 300с (внешний task-runner)
+      - N8N_RUNNERS_ENABLED=false
+      - GENERIC_TIMEZONE=${TZ}
+      - TZ=${TZ}
+      - N8N_DIAGNOSTICS_ENABLED=false
+    volumes:
+      - ./n8n-data:/home/node/.n8n
+    networks:
+      - ${BRAND}-network
+      - n8n-internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${BRAND}-network"
+      - "traefik.http.routers.${BRAND}-n8n.rule=Host(`${N8N_DOMAIN}`)"
+      - "traefik.http.routers.${BRAND}-n8n.entrypoints=websecure"
+      - "traefik.http.routers.${BRAND}-n8n.tls=true"
+      - "traefik.http.routers.${BRAND}-n8n.tls.certresolver=le"
+      - "traefik.http.services.${BRAND}-n8n.loadbalancer.server.port=5678"
+
+networks:
+  ${BRAND}-network:
+    external: true
+  n8n-internal:
+    internal: true

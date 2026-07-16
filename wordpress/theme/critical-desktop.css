@@ -1,0 +1,730 @@
+/* 1. LOCAL FONTS & METRIC-SAFE FALLBACKS (v110.0 Hard Fix) */
+
+/* Unbounded Main (Titles) - Priority #1 for LCP */
+@font-face {
+    font-family: 'Unbounded';
+    font-style: normal;
+    font-weight: 900;
+    font-display: optional;
+    src: url('/wp-content/themes/firsanov/assets/fonts/unbounded-900.woff2') format('woff2');
+}
+
+/* Unbounded Fallback (Arial optimized for Unbounded) */
+@font-face {
+    font-family: "Unbounded-fallback";
+    src: local('Arial');
+    ascent-override: 80%;
+    descent-override: 20%;
+    line-gap-override: 0%;
+    size-adjust: 120%;
+    /* Adjusted for better Arial matching */
+}
+
+/* Inter Main (Body) */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: optional;
+    src: url('/wp-content/themes/firsanov/assets/fonts/inter-400-subset.woff2') format('woff2');
+}
+
+/* Inter Fallback (Arial optimized for Inter) */
+@font-face {
+    font-family: "Inter-fallback";
+    src: local('Arial');
+    ascent-override: 90%;
+    descent-override: 22.5%;
+    line-gap-override: 0%;
+    size-adjust: 107%;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+    color: var(--text-color, #000000) !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    -webkit-hyphens: none !important;
+}
+
+/* 2. BASE STYLES (MOBILE DEFAULT) < 768px */
+body {
+    font-family: 'Inter', 'Inter-fallback', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    /* Sync with main CSS v101.0 */
+    -webkit-font-smoothing: antialiased;
+    color: var(--text-color, #000000) !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    -webkit-hyphens: none !important;
+    background: var(--body-bg, #ffffff) !important;
+}
+
+body.single {
+    background: var(--body-bg) !important;
+}
+
+/* Header (Aligned with main CSS) */
+.site-header {
+    position: relative;
+    top: 0;
+    padding-top: 15px;
+    /* Sync with firsanov-wp.css @media max-width 1024px final override */
+    padding-bottom: 20px;
+    /* CLS FIX v139.0: Match dc6gf.css final value at mobile (@media max-width 768px padding: 20px 0) */
+    min-height: 80px;
+    /* Sync with firsanov-wp.css @media max-width 1024px final override */
+    z-index: 1000;
+    box-sizing: border-box;
+    contain: layout;
+    background: transparent;
+}
+
+.blog-header {
+    min-height: 180px;
+    /* Reserve space for H1 + Subtitle on Mobile */
+    margin-bottom: 20px;
+}
+
+@media (min-width: 1024px) {
+    .blog-header {
+        min-height: 120px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .site-header {
+        min-height: 80px !important;
+        /* Sync with firsanov-wp.css — matches final override */
+        padding-top: 15px;
+    }
+
+    /* CLS FIX v136.0: Hide nav before async CSS loads (matches firsanov-wp.css line 1232) */
+    .header-navigation {
+        display: none !important;
+    }
+}
+
+.header-main-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1280px;
+    /* Sync with main CSS v98.0 */
+    margin: 0 auto;
+    padding: 0 40px;
+    /* Sync with main CSS desktop v98.0 */
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .header-main-wrapper {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start !important;
+    }
+
+    .header-search-wrapper {
+        width: 100%;
+        flex: 1 1 auto !important;
+        /* CLS FIX v139.0: !important needed — base rule (flex: 0 1 300px) appears later in source and would override this mobile override otherwise */
+    }
+
+    .header-site-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .header-custom-logo {
+        width: 36px !important;
+        height: 36px !important;
+        /* CLS FIX v137.0: Match dc6gf.css mobile value to prevent shift when async CSS loads */
+    }
+}
+
+/* CLS FIX v141.0: Hide search on single/page posts before async CSS loads */
+@media (max-width: 767px) {
+    body.single .header-search-wrapper,
+    body.page .header-search-wrapper {
+        display: none !important;
+    }
+}
+
+/* CLS FIX v141.0: .site-inner base — match async rule to prevent layout shift on CSS load */
+.site-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Mobile Corridor Expansion (v11.1) */
+@media (max-width: 767px) {
+    .site-inner {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+}
+
+/* Header Search (Aligned) */
+.header-search-wrapper {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 1 300px;
+}
+
+/* CLS FIX v136.0: Header branding flex (matches firsanov-wp.css lines 818-830) */
+.header-branding {
+    display: flex;
+    align-items: center;
+}
+
+.header-logo-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+}
+
+/* MAIN CONTENT RESERVATION (v100.0 CLS FIX) */
+.site-main {
+    padding-top: 2rem;
+    min-height: 100vh;
+}
+
+/* CATEGORY FILTERS RESERVATION (v100.0 CLS FIX) */
+.category-filters-container {
+    max-width: 1040px;
+    margin: 1rem auto 3rem !important;
+    padding: 0 20px;
+    min-height: 60px;
+    /* Placeholder to prevent jumping */
+}
+
+.category-filters {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .category-filters-container {
+        padding: 0;
+        margin-bottom: 3rem;
+        min-height: 80px;
+        /* More space for horizontal scroll on mobile */
+    }
+
+    .category-filters {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow: hidden;
+        /* Prevent scrollbar before JS/Full CSS */
+        padding: 10px 20px 20px;
+    }
+}
+
+/* CLS FIX v95.0 (Search Form) */
+.header-search-form {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    width: 100%;
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* CLS FIX v139.0: search field size pre-rendered to prevent shift when dc6gf.css loads */
+.header-search-form .search-field {
+    width: 100%;
+    padding: 12px 16px 12px 48px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 100px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.header-search-form .search-icon {
+    position: absolute;
+    left: 16px;
+    pointer-events: none;
+}
+
+/* Global Aspect Ratio Lock (v95.0) */
+img[class*="wp-image-"],
+.post-content img {
+    height: auto;
+    max-width: 100%;
+    aspect-ratio: attr(width) / attr(height);
+}
+
+.header-custom-logo {
+    width: 32px !important;
+    height: 32px !important;
+    /* CLS FIX v137.0: !important prevents HTML attr height="533" (from customizer) from overriding */
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 12px;
+    object-fit: contain !important;
+    display: block !important;
+    transition: none !important;
+}
+
+.header-site-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--slate-900, #0f172a) !important;
+    margin-left: 12px;
+}
+
+/* 2.2 CONTENT TYPOGRAPHY FORCE */
+.post-content,
+.post-content p,
+.post-content li,
+.post-content blockquote,
+.entry-content p,
+.entry-content li {
+    color: #000000 !important;
+    font-size: 1.25rem;
+    /* Sync with main CSS v104.0 */
+    line-height: 1.7;
+    /* Sync with main CSS v104.0 */
+}
+
+.post-content p {
+    margin-bottom: 1.8rem;
+    /* Sync with main CSS v104.0 */
+}
+
+/* CLS FIX v141.0: .single-post base — match async { max-width: 850px; margin: 0 auto; padding: 0 20px } */
+.single-post {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Single Post (Mobile) */
+article.single-post {
+    width: 100%;
+    padding: 24px 16px !important;
+    box-sizing: border-box;
+    background: var(--post-bg, #f1f5f9) !important;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.post-hero {
+    width: 100%;
+    margin-bottom: 2rem;
+    /* Reduced for mobile */
+    border-radius: 20px;
+    overflow: hidden;
+    /* CLS DEEP FIX v108.0: Bulletproof Padding-top Ratio */
+    position: relative;
+    padding-top: 66.66%;
+    /* 3:2 Ratio */
+    background: #f1f5f9;
+}
+
+.post-hero img,
+.single-thumb {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* RESERVE SPACE FOR DYNAMIC BLOCKS (v103.0 CLS FIX) */
+.summary-card,
+.stats-box {
+    background: #f8fafc !important;
+    /* Early neutral background */
+    border-left: 5px solid var(--primary) !important;
+    border-radius: 0 24px 24px 0 !important;
+    padding: 32px 24px !important;
+    margin: 4rem 0 !important;
+    min-height: 100px;
+    /* Placeholder height */
+    contain: layout;
+}
+
+@media (min-width: 1024px) {
+
+    .summary-card,
+    .stats-box {
+        padding: 32px 40px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .post-hero {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 20px !important;
+    }
+
+    .post-content img,
+    .wp-block-image img,
+    .single-thumb img {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 20px !important;
+    }
+}
+
+.post-title {
+    font-family: 'Unbounded', 'Unbounded-fallback', Arial, sans-serif;
+    font-size: 2.0rem;
+    /* Mobile size */
+    line-height: 1.1;
+    /* Sync with main CSS v102.0 */
+    font-weight: 900;
+    color: var(--text-color, #000000) !important;
+    margin-bottom: 1rem;
+    min-height: 80px;
+    /* Reduced for mobile */
+    display: block;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    /* Allow breaking long words but NOT hyphenation */
+    -webkit-hyphens: none !important;
+}
+
+/* Handled by .post-hero img position absolute above */
+
+/* 2.1 TABLES AS WHITE CARDS */
+.entry-content table,
+.post-content table,
+article table {
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff !important;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 2rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.entry-content th,
+article th {
+    background: #f8fafc;
+    padding: 16px;
+    font-weight: 700;
+    text-align: left;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.entry-content td,
+article td {
+    padding: 16px;
+    border-bottom: 1px solid #f7fafc;
+    color: var(--text-color, #000000);
+}
+
+.entry-content tr:last-child td,
+article tr:last-child td {
+    border-bottom: none;
+}
+
+/* Accessibility */
+.back-link,
+.back-link:visited {
+    color: var(--white, #ffffff) !important;
+    /* Text matches corridor background (Stencil Effect) */
+    background-color: var(--slate-950, #0f172a);
+    /* Dark Background */
+    /* Pill Shape & Spacing */
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    margin-top: 1rem;
+    transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.2s ease !important;
+    display: inline-block;
+}
+
+.back-link:hover {
+    color: #000000 !important;
+    /* Black Text */
+    background-color: var(--primary) !important;
+    /* Brand Background */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Posts Grid (Mobile - 1 Column) */
+.posts {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Mobile default */
+    gap: 48px 32px;
+    /* Match firsanov-wp.css final value — CLS fix v132.0 */
+    margin-bottom: 6rem;
+    /* Match firsanov-wp.css final value — CLS fix v132.0 */
+}
+
+.posts .post-card {
+    background: #ffffff !important;
+    /* CARD LOCK: ALWAYS WHITE (v112.0) */
+    border-radius: 24px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.post-card,
+.post-card *,
+.post-card p,
+.post-card span,
+.post-card .post-info,
+.post-card .post-date,
+.post-card .post-category {
+    color: #000000 !important;
+}
+
+.post-thumb img {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    object-fit: cover;
+    background: #f1f5f9;
+}
+
+/* CLS FIX v138.0: post-body, btn-card, pagination missing from critical CSS */
+.post-body {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.btn-card {
+    background: #000;
+    color: #fff !important;
+    text-align: center;
+    padding: 16px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-top: auto;
+    display: block;
+}
+
+.pagination {
+    margin: 4rem 0 6rem;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination .nav-links {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.page-numbers {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--slate-200, #e2e8f0);
+    color: var(--slate-800, #1e293b);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.page-numbers.prev,
+.page-numbers.next {
+    padding: 0 20px;
+    background: var(--slate-950, #020617);
+    color: #fff;
+    border: none;
+    font-weight: 800;
+}
+
+
+/* Accessibility v140.0: pre-render link/CTA colors for contrast compliance */
+.post-content a {
+    color: #000000 !important;
+}
+
+.hard-cta-box {
+    background: var(--slate-950, #020617);
+    color: #fff;
+}
+
+.hard-cta-box a {
+    display: inline-block;
+    background: var(--primary, #c5ef31);
+    color: var(--primary-text, #000000) !important;
+    padding: 16px 32px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 800;
+}
+
+/* 3. TABLET OVERRIDES (768px - 1023px) */
+@media (min-width: 768px) {
+
+    /* Header */
+    .site-header {
+        height: 100px;
+        padding-top: 25px;
+        transition: none !important;
+        /* CLS FIX v88.0 */
+    }
+
+    /* CLS FIX v136.0: Logo tablet size (matches firsanov-wp.css base 64px) */
+    .header-custom-logo {
+        width: 64px;
+        height: 64px;
+    }
+
+    /* Grid - 2 Columns */
+    .posts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 48px 32px;
+        /* CLS FIX v136.0: Match firsanov-wp.css base gap value */
+    }
+}
+
+
+/* 4. DESKTOP ISOLATION (1024px+) */
+@media (min-width: 1024px) {
+
+    /* Header Desktop Sync (v113.0) */
+    .site-header {
+        height: 120px;
+        padding: 40px 0 15px;
+        /* Sync with main CSS */
+        transition: none !important;
+    }
+
+    /* Body Desktop Sync (v113.0) - THE CLS FIX */
+    body.wp-singular {
+        max-width: 850px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* CLS FIX v88.0 */
+
+    .header-main-wrapper {
+        max-width: 1280px;
+        /* Sync v98.0 */
+        margin: 0 auto;
+        padding: 0 40px;
+    }
+
+    .header-custom-logo {
+        width: 64px;
+        height: 64px;
+        transition: none !important;
+        /* CLS FIX v88.0 */
+    }
+
+    .header-site-title {
+        font-size: 1.4rem;
+        color: var(--text-color, #000000);
+        margin-left: 15px;
+        letter-spacing: -0.02em;
+        /* Sync with main CSS */
+    }
+
+    /* Single Post */
+    article.single-post {
+        max-width: 850px;
+        /* Sync with main CSS corridor v97.0 */
+        margin: 2rem auto;
+        /* Center on "Desk" */
+        padding: 40px;
+        /* More breathing room */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+        /* Lifted effect */
+        background: var(--post-bg) !important;
+        /* DYNAMIC CORRIDOR (v125.0) */
+        border-radius: 32px;
+    }
+
+    .post-hero {
+        margin-bottom: 2.5rem;
+        border-radius: 24px;
+        /* CLS FIX v108.0 Desktop Lock */
+        position: relative !important;
+        padding-top: 66.66% !important;
+        /* Force 3:2 ratio */
+        height: 0 !important;
+    }
+
+    .post-title {
+        font-family: 'Unbounded', 'Unbounded-fallback', Arial, sans-serif;
+        font-size: 3.5rem;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        /* Sync with main CSS v112.0 */
+        margin-bottom: 1.5rem;
+        min-height: 140px;
+    }
+
+    /* Grid - 3 Columns */
+    .posts {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 48px 32px;
+    }
+}
+
+/* HIDE SEARCH ON MOBILE FOR ARTICLES (v135.0) */
+@media (max-width: 767px) {
+
+    .single .header-search-wrapper,
+    .page .header-search-wrapper {
+        display: none !important;
+    }
+}

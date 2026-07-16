@@ -1,0 +1,12 @@
+# секреты и рантайм — НЕ коммитить
+.env
+*/.env
+**/db-data/
+**/n8n-db/
+**/n8n-data/
+**/wordpress/wp-*
+**/wordpress/wp-content/uploads/
+**/wordpress/wp-content/cache/
+**/traefik/letsencrypt/
+*.bak
+.DS_Store

@@ -1,0 +1,425 @@
+/* 1. LOCAL FONTS LOCK (v109.0-UNIQUE-MARKER) */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: optional;
+    src: url('/wp-content/themes/firsanov/assets/fonts/inter-400.woff2') format('woff2');
+}
+
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+    color: var(--text-color, #000000) !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    -webkit-hyphens: none !important;
+}
+
+/* 2. BASE STYLES (MOBILE DEFAULT) < 768px */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    color: var(--text-color, #000000) !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    -webkit-hyphens: none !important;
+    background: var(--body-bg, #ffffff) !important;
+}
+
+body.single {
+    background: var(--body-bg) !important;
+}
+
+/* Header (Mobile) */
+.site-header {
+    height: 80px;
+    min-height: 80px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 15px;
+    box-sizing: border-box;
+    contain: layout;
+    background: var(--white, #ffffff);
+    /* CLS FIX v107.0 */
+    min-height: 80px;
+    height: 80px;
+    overflow: hidden;
+}
+
+.blog-header {
+    min-height: 180px;
+    /* Reserve space for H1 + Subtitle on Mobile */
+    margin-bottom: 20px;
+}
+
+@media (min-width: 1024px) {
+    .blog-header {
+        min-height: 120px;
+    }
+}
+
+.header-main-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Mobile Corridor Expansion (v11.1) */
+@media (max-width: 767px) {
+    .site-inner {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+}
+
+/* CLS FIX v8.0 */
+/* CLS FIX v95.0 (Search Wrapper) */
+.header-search-wrapper {
+    min-height: 44px;
+    width: 100%;
+    max-width: 44px;
+    /* Default collapsed state */
+    display: flex;
+    /* Flex is safe */
+    align-items: center;
+    justify-content: flex-end;
+    /* Align right */
+    margin-left: auto;
+    /* Push to right */
+    contain: layout size;
+    /* Strict containment */
+    overflow: hidden;
+    /* Hide potential overflow */
+}
+
+/* CLS FIX v95.0 (Search Form) */
+.header-search-form {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    width: 100%;
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Global Aspect Ratio Lock (v95.0) */
+img[class*="wp-image-"],
+.post-content img {
+    height: auto;
+    max-width: 100%;
+    aspect-ratio: attr(width) / attr(height);
+}
+
+.header-custom-logo {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    object-fit: contain;
+    transition: none !important;
+    /* CLS FIX v88.0 */
+}
+
+.header-site-title {
+    font-size: 1.1rem;
+    /* Mobile size */
+    font-weight: bold;
+    color: var(--text-color, #000000) !important;
+    margin-left: 12px;
+    font-family: 'Unbounded', sans-serif;
+}
+
+/* 2.2 CONTENT TYPOGRAPHY FORCE */
+.post-content,
+.post-content p,
+.post-content li,
+.post-content blockquote,
+.entry-content p,
+.entry-content li {
+    color: #000000 !important;
+}
+
+/* Single Post (Mobile) */
+article.single-post {
+    width: 100%;
+    padding: 20px 16px;
+    /* Reduced internal spacing for mobile corridor */
+    box-sizing: border-box;
+    background: var(--post-bg, #f1f5f9) !important;
+    /* DYNAMIC CONTENT AREA */
+    border-radius: 20px;
+    /* Slightly sharper for mobile edge usage */
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.post-hero {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+@media (max-width: 767px) {
+    .post-hero {
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        width: calc(100% + 32px) !important;
+        max-width: none !important;
+        border-radius: 0 !important;
+    }
+
+    .post-content img,
+    .wp-block-image img,
+    .single-thumb img {
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        width: calc(100% + 32px) !important;
+        max-width: none !important;
+        border-radius: 0 !important;
+    }
+}
+
+.post-title {
+    font-size: 2.0rem;
+    /* Mobile size */
+    line-height: 1.2;
+    font-weight: bold;
+    color: var(--text-color, #000000) !important;
+    margin-bottom: 1rem;
+    min-height: 80px;
+    /* Reduced for mobile */
+    display: block;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    /* Allow breaking long words but NOT hyphenation */
+    -webkit-hyphens: none !important;
+}
+
+.single-thumb,
+.single-thumb img {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    background: #f1f5f9;
+}
+
+/* 2.1 TABLES AS WHITE CARDS */
+.entry-content table,
+.post-content table,
+article table {
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff !important;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 2rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.entry-content th,
+article th {
+    background: #f8fafc;
+    padding: 16px;
+    font-weight: bold;
+    text-align: left;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.entry-content td,
+article td {
+    padding: 16px;
+    border-bottom: 1px solid #f7fafc;
+    color: var(--text-color, #000000);
+}
+
+.entry-content tr:last-child td,
+article tr:last-child td {
+    border-bottom: none;
+}
+
+/* Accessibility */
+.back-link,
+.back-link:visited {
+    color: var(--white, #ffffff) !important;
+    /* Text matches corridor background (Stencil Effect) */
+    background-color: var(--slate-950, #0f172a);
+    /* Dark Background */
+    /* Pill Shape & Spacing */
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    margin-top: 1rem;
+    transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.2s ease !important;
+    display: inline-block;
+}
+
+.back-link:hover {
+    color: #000000 !important;
+    /* Black Text */
+    background-color: var(--primary) !important;
+    /* Brand Background */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Posts Grid (Mobile - 1 Column) */
+.posts {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Mobile default */
+    gap: 32px;
+    margin-bottom: 4rem;
+}
+
+.posts .post-card {
+    background: #ffffff !important;
+    /* CARD LOCK: ALWAYS WHITE (v112.0) */
+    border-radius: 24px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.post-card,
+.post-card *,
+.post-card p,
+.post-card span,
+.post-card .post-info,
+.post-card .post-date,
+.post-card .post-category {
+    color: #000000 !important;
+}
+
+.post-thumb img {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    object-fit: cover;
+    background: #f1f5f9;
+}
+
+
+/* 3. TABLET OVERRIDES (768px - 1023px) */
+@media (min-width: 768px) {
+
+    /* Header */
+    .site-header {
+        height: 100px;
+        padding-top: 25px;
+        transition: none !important;
+        /* CLS FIX v88.0 */
+    }
+
+    /* Grid - 2 Columns */
+    .posts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+}
+
+
+/* 4. DESKTOP ISOLATION (1024px+) */
+@media (min-width: 1024px) {
+
+    /* Header */
+    .site-header {
+        height: 120px;
+        padding-top: 40px;
+        transition: none !important;
+        /* CLS FIX v88.0 */
+    }
+
+    .header-main-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .header-custom-logo {
+        width: 64px;
+        height: 64px;
+        transition: none !important;
+        /* CLS FIX v88.0 */
+    }
+
+    .header-site-title {
+        font-size: 1.4rem;
+        color: var(--text-color, #000000);
+        margin-left: 15px;
+    }
+
+    /* Single Post */
+    article.single-post {
+        max-width: 1000px;
+        margin: 2rem auto;
+        /* Center on "Desk" */
+        padding: 40px;
+        /* More breathing room */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+        /* Lifted effect */
+        background: var(--post-bg) !important;
+        /* Dynamic Center Corridor (Inverted v13.1) */
+        border-radius: 32px;
+    }
+
+    .post-hero {
+        margin-bottom: 2.5rem;
+        border-radius: 24px;
+    }
+
+    .post-title {
+        font-size: 3.5rem;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        min-height: 140px;
+    }
+
+    /* Grid - 3 Columns */
+    .posts {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 48px 32px;
+    }
+}
+/* LCP OPTIMIZATION v130.0 */
+.single-thumb, .single-thumb img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
+    will-change: transform;
+}
