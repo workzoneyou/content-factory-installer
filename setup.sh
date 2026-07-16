@@ -42,29 +42,22 @@ if ! command -v docker >/dev/null; then hdr "Ставлю Docker"; curl -fsSL ht
 docker compose version >/dev/null 2>&1 || die "Нужен docker compose v2"
 ok "Docker готов"
 
-# ── ВОПРОСЫ ─────────────────────────────────────────────────
-hdr "Настройка"
-ask "Бренд-слаг (латиница, напр. acme) — имена контейнеров/тема" BRAND
-[[ "$BRAND" =~ ^[a-z][a-z0-9-]*$ ]] || die "Слаг: латиница, начиная с буквы, без пробелов"
-ask "Название сайта (видно в шапке)" SITE_NAME "$BRAND"
-ask "Имя бренда/автора (для темы)" BRAND_NAME "$SITE_NAME"
-
-while :; do ask "Домен блога (blog.site.ru)" BLOG_DOMAIN; BLOG_DOMAIN=$(clean_domain "$BLOG_DOMAIN"); [ -n "$BLOG_DOMAIN" ] && break; warn "Домен обязателен"; done
-while :; do ask "Домен n8n (n8n.site.ru)" N8N_DOMAIN; N8N_DOMAIN=$(clean_domain "$N8N_DOMAIN"); [ -n "$N8N_DOMAIN" ] && break; warn "Домен обязателен"; done
-while :; do ask "Email для SSL (Let's Encrypt)" SSL_EMAIL; valid_email "$SSL_EMAIL" && break; warn "Некорректный email"; done
-BRAND_URL="https://${BLOG_DOMAIN}"
-
+# ── ВОПРОСЫ (только то, что нужно для самой установки) ───────
+# Всё остальное (название сайта, автор, соцсети, Метрика) настраивается
+# в самом WordPress ПОСЛЕ установки — здесь не спрашиваем.
+hdr "Параметры установки"
+while :; do ask "Домен блога (напр. blog.site.ru)" BLOG_DOMAIN; BLOG_DOMAIN=$(clean_domain "$BLOG_DOMAIN"); [ -n "$BLOG_DOMAIN" ] && break; warn "Домен обязателен"; done
+while :; do ask "Домен n8n (напр. n8n.site.ru)"  N8N_DOMAIN;  N8N_DOMAIN=$(clean_domain "$N8N_DOMAIN");  [ -n "$N8N_DOMAIN"  ] && break; warn "Домен обязателен"; done
+while :; do ask "Email для SSL-сертификата (Let's Encrypt)" SSL_EMAIL; valid_email "$SSL_EMAIL" && break; warn "Некорректный email"; done
 ask "Логин WP-админа" WP_ADMIN_USER "admin"
 ask "Email WP-админа" WP_ADMIN_EMAIL "$SSL_EMAIL"
-ask "ID Яндекс.Метрики (Enter — пропустить)" YANDEX_METRIKA_ID ""
 
-hdr "Автор блога (карточка)"
-ask "Отображаемое имя автора" AUTHOR_DISPLAY "$BRAND_NAME"
-ask "Короткое описание автора (bio)" AUTHOR_BIO "Практик маркетинга. Пишу о том, что реально работает."
-ask "Сайт автора (Enter — сайт блога)" AUTHOR_SITE ""
-ask "ВК автора (Enter — пропустить)" AUTHOR_VK ""
-ask "Telegram автора (Enter — пропустить)" AUTHOR_TELEGRAM ""
-ask "YouTube автора (Enter — пропустить)" AUTHOR_YOUTUBE ""
+# ── Фиксированные значения (точная копия системы Firsanov, не спрашиваем) ──
+BRAND=firsanov                       # имена контейнеров/сети/папок И папка темы:
+                                     # CSS и шрифты темы жёстко ждут /wp-content/themes/firsanov/
+SITE_NAME="Блог"                     # заголовок сайта — меняется в WP: Настройки → Общие
+BRAND_URL="https://${BLOG_DOMAIN}"
+YANDEX_METRIKA_ID=""                 # Метрику подключают в WP уже после установки
 
 # DNS-подсказка
 SRV_IP=$(curl -s --max-time 8 https://ifconfig.me || echo "")
@@ -92,7 +85,6 @@ ROOT="$(pwd)"
 DB_NAME=wordpress; DB_USER=wp; TZ=Europe/Moscow
 cat > .env <<EOF
 BRAND=$BRAND
-BRAND_NAME=$BRAND_NAME
 BRAND_URL=$BRAND_URL
 BLOG_DOMAIN=$BLOG_DOMAIN
 N8N_DOMAIN=$N8N_DOMAIN
@@ -106,12 +98,6 @@ DB_USER=$DB_USER
 DB_PASSWORD=$DB_PASSWORD
 DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
 YANDEX_METRIKA_ID=$YANDEX_METRIKA_ID
-AUTHOR_DISPLAY=$AUTHOR_DISPLAY
-AUTHOR_BIO=$AUTHOR_BIO
-AUTHOR_SITE=$AUTHOR_SITE
-AUTHOR_VK=$AUTHOR_VK
-AUTHOR_TELEGRAM=$AUTHOR_TELEGRAM
-AUTHOR_YOUTUBE=$AUTHOR_YOUTUBE
 N8N_DB_PASSWORD=$N8N_DB_PASSWORD
 N8N_ENCRYPTION_KEY=$N8N_ENCRYPTION_KEY
 TZ=$TZ
@@ -135,8 +121,8 @@ wp_root core is-installed 2>/dev/null || wp_root core install --url="https://${B
 wp_root language core install ru_RU --activate 2>/dev/null || true
 wp_root rewrite structure '/%postname%/' --hard >/dev/null
 wp_root option update blogdescription '' >/dev/null
-wp_root theme is-installed "${BRAND}" 2>/dev/null && wp_root theme activate "${BRAND}" >/dev/null || die "Тема ${BRAND} не найдена"
-ok "WordPress установлен, тема активна"
+wp_root theme is-installed firsanov 2>/dev/null && wp_root theme activate firsanov >/dev/null || die "Тема firsanov не найдена"
+ok "WordPress установлен, тема firsanov активна"
 bash wordpress/scripts/install-plugins.sh
 docker cp wordpress/scripts/configure-plugins.php "$WP:/tmp/cfg.php"
 docker exec -e YANDEX_METRIKA_ID="${YANDEX_METRIKA_ID:-}" "$WP" php /tmp/cfg.php
@@ -157,7 +143,12 @@ ${GREEN}✓ Готово${NC}
   n8n:     https://${N8N_DOMAIN}
   Секреты — в ${ROOT}/.env  (сохраните в бэкап!)
 
-${YELLOW}Дальше вручную:${NC} импорт воркфлоу n8n, креды (OpenRouter/KIE/Perplexity/Google/WP),
+${YELLOW}Настроить в самом WordPress (wp-admin):${NC}
+  • Настройки → Общие: название сайта.
+  • Профиль автора: имя, описание, ВК/Telegram/RuTube/TenChat (поля уже добавлены).
+  • Метрика: вставить ID счётчика в настройках плагина.
+
+${YELLOW}Настроить в n8n:${NC} импорт воркфлоу, креды (OpenRouter/KIE/Perplexity/Google/WP),
   подключить Google-таблицу (лист ОПУБЛИКОВАНО оставить пустым), залить темы → тест-прогон.
   Первый SSL — 30–60 сек: curl -sI https://${BLOG_DOMAIN}
 EOF
