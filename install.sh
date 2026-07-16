@@ -116,7 +116,7 @@ for i in $(seq 1 60); do
   docker exec "${BRAND}-n8n" wget -qO- http://localhost:5678/healthz >/dev/null 2>&1 && { ok "n8n отвечает"; break; }
   sleep 2; [[ $i -eq 60 ]] && warn "n8n не ответил на healthz за 2 мин — проверьте логи"
 done
-bash n8n/setup.sh
+ok "n8n поднят (пустой — воркфлоу и креды заводятся отдельно)"
 
 # ============================================================
 # ИТОГ
@@ -131,11 +131,10 @@ ${GREEN}════════════════════════
   DB root:  ${DB_ROOT_PASSWORD}
   Секреты — в .env. Обязательно сохраните его в бэкап.
 
-${YELLOW}ОСТАЛОСЬ РУЧНОЕ (см. README, шаги 6–8):${NC}
-  1. n8n → Credentials: завести OpenRouter, KIE, Perplexity, Google Sheets(OAuth), WP(basic auth)
-  2. Открыть 6 воркфлоу, выбрать в нодах эти креды (n8n подсветит красным)
-  3. Скопировать шаблон Google-таблиц (google/SHEETS_TEMPLATE.md), вписать GOOGLE_SHEET_ID в .env, перезапустить n8n/setup.sh
-  4. Google Drive OAuth для бэкапа статей (UpdraftPlus + n8n)
-  5. Заполнить КОНВЕЙЕР темами, ПРОМПТЫ, ОФФЕРЫ → тест-прогон МАСТЕРА
-  6. Первый SSL — 30–60 сек: curl -sI https://${BLOG_DOMAIN}
+${YELLOW}ДАЛЬШЕ ВРУЧНУЮ (воркфлоу и Google-таблица ставятся ОТДЕЛЬНО):${NC}
+  1. n8n (${N8N_DOMAIN}) поднят и пустой — импортируйте свои воркфлоу через UI
+  2. n8n → Credentials: завести OpenRouter, KIE, Perplexity, Google Sheets(OAuth), WP(basic auth), выбрать их в нодах
+  3. Подключить Google-таблицу (Sheets) и Google Drive (бэкап статей)
+  4. Залить темы/офферы → тест-прогон
+  5. Первый SSL — 30–60 сек: curl -sI https://${BLOG_DOMAIN}
 EOF
