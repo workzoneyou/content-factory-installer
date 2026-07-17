@@ -13,6 +13,14 @@ hdr(){ echo -e "\n${BLUE}════ $* ════${NC}"; }
 ok(){ echo -e "${GREEN}✓${NC} $*"; }
 warn(){ echo -e "${YELLOW}⚠${NC} $*"; }
 die(){ echo -e "${RED}✗${NC} $*" >&2; exit 1; }
+# зелёная рамка вокруг строк-аргументов (ширина по самой длинной строке; кириллица считается корректно в UTF-8)
+box_green(){ local w=0 ln pad rule
+  for ln in "$@"; do (( ${#ln} > w )) && w=${#ln}; done
+  rule=$(printf '─%.0s' $(seq $((w+2))))
+  printf '%s┌%s┐%s\n' "$GREEN" "$rule" "$NC"
+  for ln in "$@"; do pad=$(printf '%*s' $(( w-${#ln} )) ''); printf '%s│%s %s%s %s│%s\n' "$GREEN" "$NC" "$ln" "$pad" "$GREEN" "$NC"; done
+  printf '%s└%s┘%s\n' "$GREEN" "$rule" "$NC"
+}
 
 # --- ввод через /dev/tty (работает при curl | bash) ---
 ask(){ # ask "Вопрос" ПЕРЕМЕННАЯ ["дефолт"]
@@ -160,26 +168,23 @@ TXT
 chmod 600 "${ROOT}/ДОСТУПЫ.txt"
 
 # ── Итог ────────────────────────────────────────────────────
+echo
+printf '%s✓ Установка завершена%s\n\n' "$GREEN" "$NC"
+box_green \
+  "ДАННЫЕ ДЛЯ ВХОДА" \
+  "" \
+  "WordPress" \
+  "  Адрес:  https://${BLOG_DOMAIN}/wp-admin" \
+  "  Логин:  ${WP_ADMIN_USER}" \
+  "  Пароль: ${WP_ADMIN_PASSWORD}" \
+  "" \
+  "n8n" \
+  "  Адрес:  https://${N8N_DOMAIN}" \
+  "  Вход:   аккаунт создаётся при первом входе (email + пароль)"
 cat <<EOF
-
-${GREEN}════════════════════════════════════════════════════════════${NC}
-${GREEN}✓ Установка завершена${NC}
-
-${YELLOW}━━━━━━━━━━━━━━ ДАННЫЕ ДЛЯ ВХОДА ━━━━━━━━━━━━━━${NC}
-
-  WordPress
-    Адрес:   https://${BLOG_DOMAIN}/wp-admin
-    Логин:   ${WP_ADMIN_USER}
-    Пароль:  ${WP_ADMIN_PASSWORD}
-
-  n8n
-    Адрес:   https://${N8N_DOMAIN}
-    Вход:    логина заранее нет — при первом заходе n8n сам
-             попросит создать аккаунт владельца (email + пароль).
 
   Сохранено в файл: ${ROOT}/ДОСТУПЫ.txt
   Все секреты:      ${ROOT}/.env   (сохраните в бэкап!)
-${GREEN}════════════════════════════════════════════════════════════${NC}
 
 ${YELLOW}Настроить в WordPress (wp-admin):${NC}
   • Настройки → Общие: название сайта.
