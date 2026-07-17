@@ -130,7 +130,13 @@ touch wordpress/traefik/letsencrypt/acme.json; chmod 600 wordpress/traefik/letse
 ( cd wordpress && docker compose --env-file ../.env up -d )
 for i in $(seq 1 60); do docker exec "$WP" curl -sf http://localhost/ -o /dev/null 2>&1 && break; sleep 2; [ $i -eq 60 ] && die "WP не стартовал"; done
 ok "WP поднят"
-docker exec "$WP" which wp >/dev/null 2>&1 || docker exec "$WP" bash -c "curl -sL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp && chmod +x /usr/local/bin/wp"
+if ! docker exec "$WP" which wp >/dev/null 2>&1; then
+  for i in 1 2 3 4 5; do
+    docker exec "$WP" bash -c "curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp && chmod +x /usr/local/bin/wp" && break
+    warn "WP-CLI не скачался (попытка $i/5), повтор через 3с…"; sleep 3
+  done
+  docker exec "$WP" which wp >/dev/null 2>&1 || die "Не удалось установить WP-CLI (проверьте сеть на сервере)"
+fi
 wp_root core is-installed 2>/dev/null || wp_root core install --url="https://${BLOG_DOMAIN}" --title="${SITE_NAME}" --admin_user="${WP_ADMIN_USER}" --admin_password="${WP_ADMIN_PASSWORD}" --admin_email="${WP_ADMIN_EMAIL}" --skip-email
 wp_root language core install ru_RU --activate 2>/dev/null || true
 wp_root rewrite structure '/%postname%/' --hard >/dev/null
