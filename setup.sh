@@ -149,7 +149,31 @@ mkdir -p n8n/n8n-db n8n/n8n-data
 # EACCES на /home/node/.n8n/config и крэш-луп. Отдаём её node заранее.
 chown -R 1000:1000 n8n/n8n-data
 ( cd n8n && docker compose --env-file ../.env up -d )
-ok "n8n поднят (пустой — воркфлоу и креды заводятся отдельно)"
+ok "n8n поднят"
+
+# ── Аккаунт владельца n8n (чтобы не проходить настройку вручную) ──
+N8N_OWNER_EMAIL="${WP_ADMIN_EMAIL}"
+N8N_OWNER_PASSWORD="$(gen | cut -c1-20)9A"    # gen + гарантированно цифра и заглавная (требования n8n)
+for i in $(seq 1 40); do
+  docker exec firsanov-n8n wget -qO- http://localhost:5678/rest/settings >/dev/null 2>&1 && break
+  sleep 2
+done
+_n8n_body="{\"email\":\"${N8N_OWNER_EMAIL}\",\"firstName\":\"Admin\",\"lastName\":\"Firsanov\",\"password\":\"${N8N_OWNER_PASSWORD}\"}"
+if docker exec firsanov-n8n wget -qO- --header="Content-Type: application/json" --post-data="$_n8n_body" http://localhost:5678/rest/owner/setup >/dev/null 2>&1; then
+  ok "аккаунт n8n создан: ${N8N_OWNER_EMAIL}"
+else
+  warn "не удалось авто-создать аккаунт n8n — создашь при первом заходе"
+  N8N_OWNER_PASSWORD=""
+fi
+
+# ── Строки n8n для блока доступов (зависят от того, создан ли аккаунт) ──
+if [ -n "${N8N_OWNER_PASSWORD:-}" ]; then
+  _n8n_txt=$(printf '  Логин:  %s\n  Пароль: %s' "$N8N_OWNER_EMAIL" "$N8N_OWNER_PASSWORD")
+  _n8n_box=( "  Логин:  ${N8N_OWNER_EMAIL}" "  Пароль: ${N8N_OWNER_PASSWORD}" )
+else
+  _n8n_txt='  Вход:   логина заранее нет — при первом заходе создать аккаунт (email + пароль)'
+  _n8n_box=( "  Вход:   создать аккаунт при первом заходе (email + пароль)" )
+fi
 
 # ── Доступы отдельным файлом (чтобы не потерялись) ───────────
 cat > "${ROOT}/ДОСТУПЫ.txt" <<TXT
@@ -160,8 +184,7 @@ WordPress
 
 n8n
   Адрес:  https://${N8N_DOMAIN}
-  Вход:   логина заранее нет — при первом заходе n8n попросит
-          создать аккаунт владельца (свой email + любой пароль)
+${_n8n_txt}
 
 Все секреты (пароли БД, ключ n8n): ${ROOT}/.env
 TXT
@@ -180,7 +203,7 @@ box_green \
   "" \
   "n8n" \
   "  Адрес:  https://${N8N_DOMAIN}" \
-  "  Вход:   аккаунт создаётся при первом входе (email + пароль)"
+  "${_n8n_box[@]}"
 cat <<EOF
 
   Сохранено в файл: ${ROOT}/ДОСТУПЫ.txt
