@@ -30,13 +30,15 @@ valid_email(){ [[ "$1" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; }
 
 [[ $EUID -eq 0 ]] || die "Запустите под root:  curl -sSL … | sudo bash   (или sudo -i, затем команда)"
 
-cat <<'LOGO'
-
-  ┌─────────────────────────────────────────┐
-  │   CONTENT FACTORY — установщик           │
-  │   WordPress + n8n + SSL, за пару минут   │
-  └─────────────────────────────────────────┘
-LOGO
+# Логотип: рамку считаем программно (центрируем ASCII-строки), правый край всегда ровный
+_bw=42; _rule=$(printf '─%.0s' $(seq "$_bw"))
+_bline(){ local s="$1"; local n=${#s}; local l=$(( (_bw-n)/2 )); local r=$(( _bw-n-l )); printf '  │%*s%s%*s│\n' "$l" '' "$s" "$r" ''; }
+echo
+echo "  ┌${_rule}┐"
+_bline "FIRSANOV TEAM"
+_bline "Content Factory installer"
+_bline "WordPress + n8n + SSL"
+echo "  └${_rule}┘"
 
 # ── Docker + зависимости ────────────────────────────────────
 command -v curl >/dev/null || { apt-get update -qq && apt-get install -y -qq curl; }
@@ -141,16 +143,45 @@ chown -R 1000:1000 n8n/n8n-data
 ( cd n8n && docker compose --env-file ../.env up -d )
 ok "n8n поднят (пустой — воркфлоу и креды заводятся отдельно)"
 
+# ── Доступы отдельным файлом (чтобы не потерялись) ───────────
+cat > "${ROOT}/ДОСТУПЫ.txt" <<TXT
+WordPress
+  Адрес:  https://${BLOG_DOMAIN}/wp-admin
+  Логин:  ${WP_ADMIN_USER}
+  Пароль: ${WP_ADMIN_PASSWORD}
+
+n8n
+  Адрес:  https://${N8N_DOMAIN}
+  Вход:   логина заранее нет — при первом заходе n8n попросит
+          создать аккаунт владельца (свой email + любой пароль)
+
+Все секреты (пароли БД, ключ n8n): ${ROOT}/.env
+TXT
+chmod 600 "${ROOT}/ДОСТУПЫ.txt"
+
 # ── Итог ────────────────────────────────────────────────────
 cat <<EOF
 
 ${GREEN}════════════════════════════════════════════════════════════${NC}
-${GREEN}✓ Готово${NC}
-  Блог:    https://${BLOG_DOMAIN}   (${WP_ADMIN_USER} / ${WP_ADMIN_PASSWORD})
-  n8n:     https://${N8N_DOMAIN}
-  Секреты — в ${ROOT}/.env  (сохраните в бэкап!)
+${GREEN}✓ Установка завершена${NC}
 
-${YELLOW}Настроить в самом WordPress (wp-admin):${NC}
+${YELLOW}━━━━━━━━━━━━━━ ДАННЫЕ ДЛЯ ВХОДА ━━━━━━━━━━━━━━${NC}
+
+  WordPress
+    Адрес:   https://${BLOG_DOMAIN}/wp-admin
+    Логин:   ${WP_ADMIN_USER}
+    Пароль:  ${WP_ADMIN_PASSWORD}
+
+  n8n
+    Адрес:   https://${N8N_DOMAIN}
+    Вход:    логина заранее нет — при первом заходе n8n сам
+             попросит создать аккаунт владельца (email + пароль).
+
+  Сохранено в файл: ${ROOT}/ДОСТУПЫ.txt
+  Все секреты:      ${ROOT}/.env   (сохраните в бэкап!)
+${GREEN}════════════════════════════════════════════════════════════${NC}
+
+${YELLOW}Настроить в WordPress (wp-admin):${NC}
   • Настройки → Общие: название сайта.
   • Профиль автора: имя, описание, ВК/Telegram/RuTube/TenChat (поля уже добавлены).
   • Метрика: вставить ID счётчика в настройках плагина.
