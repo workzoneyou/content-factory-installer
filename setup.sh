@@ -8,7 +8,7 @@ set -euo pipefail
 
 REPO_TARBALL="https://github.com/workzoneyou/content-factory-installer/archive/refs/heads/main.tar.gz"
 
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+RED=$'\033[0;31m'; GREEN=$'\033[0;32m'; YELLOW=$'\033[1;33m'; BLUE=$'\033[0;34m'; NC=$'\033[0m'
 hdr(){ echo -e "\n${BLUE}════ $* ════${NC}"; }
 ok(){ echo -e "${GREEN}✓${NC} $*"; }
 warn(){ echo -e "${YELLOW}⚠${NC} $*"; }
@@ -135,6 +135,9 @@ bash wordpress/scripts/wp-settings.sh
 # ── n8n ─────────────────────────────────────────────────────
 hdr "Разворачиваю n8n"
 mkdir -p n8n/n8n-db n8n/n8n-data
+# n8n внутри работает под uid 1000 (node). Если папка данных принадлежит root —
+# EACCES на /home/node/.n8n/config и крэш-луп. Отдаём её node заранее.
+chown -R 1000:1000 n8n/n8n-data
 ( cd n8n && docker compose --env-file ../.env up -d )
 ok "n8n поднят (пустой — воркфлоу и креды заводятся отдельно)"
 
